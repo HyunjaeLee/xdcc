@@ -1,64 +1,82 @@
-import com.google.gson.Gson;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.pircbotx.Configuration;
+import org.pircbotx.PircBotX;
+import org.pircbotx.UtilSSLSocketFactory;
+import org.pircbotx.cap.TLSCapHandler;
+import org.pircbotx.exception.IrcException;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.events.IncomingFileTransferEvent;
+import org.pircbotx.hooks.events.JoinEvent;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
+import java.io.File;
+import java.io.IOException;
 
-public class Main {
+public class Main extends ListenerAdapter {
+
+    private static PircBotX bot;
 
     public static void main(String[] args) throws Exception {
 
+        Configuration configuration = new Configuration.Builder()
+                .setName("PircBotX")
+                .setAutoNickChange(true)
+                .setCapEnabled(true)
+                .addCapHandler(new TLSCapHandler(new UtilSSLSocketFactory().trustAllCertificates(), true))
+                .addListener(new Main())
+                .addServer("irc.rizon.net")
+                .addAutoJoinChannel("#nipponsei")
+                //.addAutoJoinChannel("#doki")
+                .buildConfiguration();
 
-        for (Pack pack : Doki("girlish 1080")) {
-            System.out.println(pack.getFileName() + " | " + pack.getMessage());
-        }
+        bot = new PircBotX(configuration);
 
-        for(Pack pack : Nipponsei()) {
-            System.out.println(pack.getFileName() + " | " + pack.getMessage());
-        }
+        new Thread(() -> {
+            try {
+                bot.startBot();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (IrcException e) {
+                e.printStackTrace();
+            }
+        }).start();
 
-    }
-
-    public static Pack[] Doki(String keyword) throws Exception {
-
-        Document doc = Jsoup.connect("http://xdcc.anidex.moe/search.php")
-                .data("t", keyword)
-                .get(); // Do post() to get all lists
-
-        ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-        engine.eval("function p(text){return p.k=new Array,eval(text),JSON.stringify(p.k)}");
-
-        Invocable invocable = (Invocable) engine;
-
-        String json = (String) invocable.invokeFunction("p", doc.text());
-
-        return new Gson().fromJson(json, Pack[].class);
-
-    }
-
-    public static Pack[] Nipponsei() throws Exception {
-
-        Document doc = Jsoup.connect("https://nipponsei.minglong.org/packlist/archive/").get();
-
-        Elements rows = doc.select("#main table tr");
-        int size = rows.size();
-        Pack[] packs = new Pack[size-9];
-        for (int i = 5, j = size-4, k = 0; i < j; i++, k++){
-            Element row = rows.get(i);
-            Elements columns = row.select("td");
-            packs[k] = new Pack("Nippon|zongzing", parseInt(columns.get(0).text()), columns.get(3).text(), parseInt(columns.get(2).text()));
-        }
-
-        return packs;
+        //System.out.println(bot.getUserChannelDao().containsChannel("#nipponsei"));
 
     }
 
-    private static String parseInt(String s) {
-        return s.replaceAll("[^0-9]", "");
+    @Override
+    public void onJoin(JoinEvent event) throws Exception {
+        //event.getBot().send().message("Nippon|zongzing", "xdcc send #4698");
     }
+
+    @Override
+    public void onIncomingFileTransfer(IncomingFileTransferEvent event) throws Exception {
+
+        File file = new File(System.getProperty("user.home") + "/Downloads/" + event.getSafeFilename());
+        event.accept(file).transfer();
+        /*
+        Socket socket = new Socket(event.getAddress(), event.getPort(), getRealDccLocalAddress(event.getAddress()), 0);
+        ReadableByteChannel rbc = Channels.newChannel(socket.getInputStream());
+        FileOutputStream fos = new FileOutputStream(file);
+        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+        fos.close();
+        rbc.close();
+        */
+
+    }
+    /*
+    private InetAddress getRealDccLocalAddress(InetAddress destAddress) {
+
+        InetAddress address = bot.getConfiguration().getDccLocalAddress();
+        address = (address != null && destAddress.getClass().equals(address.getClass())) ? address : bot.getConfiguration().getLocalAddress();
+        address = (address != null && destAddress.getClass().equals(address.getClass())) ? address : bot.getLocalAddress();
+        address = (address != null && destAddress.getClass().equals(address.getClass())) ? address : null;
+        return address;
+
+    }
+    */
+
+
+
+
 
 }
