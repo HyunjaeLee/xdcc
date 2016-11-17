@@ -54,8 +54,10 @@ public class Pack {
         this.fileSize = fileSize;
     }
 
+    /*
     public String getMessage() {
         return "/msg " + botName + " xdcc send #" + packNumber;
     }
+    */
 
 }
