@@ -21,16 +21,6 @@ public class Bot {
     }
 
     public boolean isJoined() {
-        /*
-        String[] channels = {"#nipponsei"}; //doki 도 추가하자
-        UserChannelDao<User, Channel> userChannelDao = bot.getUserChannelDao();
-        for(String channel : channels) {
-            if(!userChannelDao.containsChannel(channel)) {
-                return false;
-            }
-        }
-        return true;
-        */
         return bot.getUserChannelDao().containsChannel("#nipponsei");
     }
 
