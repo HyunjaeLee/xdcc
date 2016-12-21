@@ -9,9 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
-public class FileTransfer implements Runnable{
+public class FileTransfer implements Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(Writer.class);
+    private static final Logger logger = LoggerFactory.getLogger(FileTransfer.class);
 
     private String ip;
     private int port;

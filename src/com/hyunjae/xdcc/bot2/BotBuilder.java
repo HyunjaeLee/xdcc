@@ -4,32 +4,37 @@ import java.io.IOException;
 
 public class BotBuilder {
 
-    private BotData botData;
+    private String server;
+    private String nick;
+    private String channel;
 
     public static BotBuilder newBotBuilder() {
         return new BotBuilder();
     }
 
     private BotBuilder() {
-        botData = new BotData();
+
+        server = "";
+        nick = "";
+        channel = "";
     }
 
     public BotBuilder setServer(String server) {
-        botData.setServer(server);
+        this.server = server;
         return this;
     }
 
     public BotBuilder setNick(String nick) {
-        botData.setNick(nick);
+        this.nick = nick;
         return this;
     }
 
     public BotBuilder setChannel(String channel) {
-        botData.setChannel(channel);
+        this.channel = channel;
         return this;
     }
 
     public Bot build() throws IOException {
-        return new Bot(botData);
+        return new Bot(server, nick, channel);
     }
 }
