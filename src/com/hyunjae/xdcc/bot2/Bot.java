@@ -29,7 +29,7 @@ public class Bot implements Observer {
 
         final Reader reader = new Reader(socket);
         reader.addObserver(this);
-        run(reader);
+        new Thread(reader).start();
     }
 
     @Override
@@ -105,9 +105,5 @@ public class Bot implements Observer {
                 + ((ip >> 16) & 0xFF) + "."
                 + ((ip >> 8) & 0xFF) + "."
                 + (ip & 0xFF);
-    }
-
-    private static void run(Runnable o) {
-        new Thread(o).start();
     }
 }

@@ -14,27 +14,30 @@ public class BotBuilder {
 
     private BotBuilder() {
 
-        server = "";
-        nick = "";
-        channel = "";
+        this.server = "";
+        this.nick = "";
+        this.channel = "";
     }
 
     public BotBuilder setServer(String server) {
+
         this.server = server;
         return this;
     }
 
     public BotBuilder setNick(String nick) {
+
         this.nick = nick;
         return this;
     }
 
     public BotBuilder setChannel(String channel) {
+
         this.channel = channel;
         return this;
     }
 
     public Bot build() throws IOException {
-        return new Bot(server, nick, channel);
+        return new Bot(this.server, this.nick, this.channel);
     }
 }
