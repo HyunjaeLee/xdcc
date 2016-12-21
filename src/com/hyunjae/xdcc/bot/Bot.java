@@ -1,3 +1,5 @@
+package com.hyunjae.xdcc.bot;
+
 import org.pircbotx.*;
 import org.pircbotx.exception.IrcException;
 

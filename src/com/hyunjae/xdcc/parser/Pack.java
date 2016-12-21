@@ -1,3 +1,5 @@
+package com.hyunjae.xdcc.parser;
+
 import com.google.gson.annotations.SerializedName;
 
 public class Pack {

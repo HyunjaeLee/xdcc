@@ -1,3 +1,5 @@
+package com.hyunjae.xdcc.bot;
+
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.events.IncomingFileTransferEvent;
 import org.slf4j.Logger;
