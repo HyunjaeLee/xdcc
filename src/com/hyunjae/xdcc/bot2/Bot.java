@@ -43,7 +43,6 @@ public class Bot implements Observer {
     public void update(Observable o, Object arg) {
 
         String str = (String) arg;
-
         if(getNumeric(str).equals("001")) { // Connected to server
 
             for(String channel : channels) {
@@ -78,7 +77,7 @@ public class Bot implements Observer {
             logger.debug("filename: {}, ip: {}, port: {}, fileSize: {}", filename, ip, port, fileSize);
 
             String file = System.getProperty("user.home") + "/Downloads/" + filename;
-            FileTransfer.newFileTransfer(ip, port, fileSize, file);
+            FileTransfer.newFileTransfer(ip, port, file);
         }
     }
 
@@ -96,6 +95,10 @@ public class Bot implements Observer {
 
     public void sendXdcc(String botName, String packNumber) {
         sendRaw("PRIVMSG " + botName + " :xdcc send #" + packNumber);
+    }
+
+    public void quit() {
+        sendRaw("QUIT");
     }
 
     public Status getChannelStatus(String channel) {

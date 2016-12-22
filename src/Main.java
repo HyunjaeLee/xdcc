@@ -18,12 +18,13 @@ public class Main {
                 .build();
 
         while(true) {
-            if(bot.getChannelStatus("#doki") == Status.OK)
+            if(bot.getChannelStatus("#doki") == Status.OK
+                    && bot.getChannelStatus("#nipponsei") == Status.OK)
                 break;
             else
                 Thread.sleep(100);
         }
 
-        bot.sendXdcc("Doki|Homura","2374");
+        bot.sendXdcc("Nippon|zongzing","105");
     }
 }

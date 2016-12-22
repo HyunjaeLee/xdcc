@@ -34,5 +34,7 @@ public class Reader extends Observable implements Runnable {
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
+
+        logger.debug("Reader closed");
     }
 }

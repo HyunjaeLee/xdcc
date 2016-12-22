@@ -24,9 +24,9 @@ public class BotBuilder {
         return this;
     }
 
-    public BotBuilder setChannel(String... channel) {
+    public BotBuilder setChannel(String... channels) {
 
-        this.channels = channel;
+        this.channels = channels;
         return this;
     }
 
