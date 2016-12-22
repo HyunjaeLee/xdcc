@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -14,12 +16,17 @@ public class Bot implements Observer {
 
     private BufferedWriter writer;
     private String nick;
-    private String channel;
+    private String[] channels;
+    private Map<String, Status> channelStatus;
 
-    public Bot(String server, String nick, String channel) throws IOException {
+    public Bot(String server, String nick, String channels[]) throws IOException {
 
         this.nick = nick;
-        this.channel = channel;
+        this.channels = channels;
+        this.channelStatus = new HashMap<>();
+        for(String channel : channels) {
+            channelStatus.put(channel, Status.WAITING);
+        }
 
         Socket socket = new Socket(server, 6667);
         writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -36,14 +43,42 @@ public class Bot implements Observer {
     public void update(Observable o, Object arg) {
 
         String str = (String) arg;
-        if(str.split(" ")[1].equals("001")) { // Connected to server
-            joinChannel();
+
+        if(getNumeric(str).equals("001")) { // Connected to server
+
+            for(String channel : channels) {
+                sendRaw("JOIN " + channel);
+            }
+
         } else if(str.startsWith("PING")) {
-            pong(str);
-        } else if(str.contains("433")) { // Nickname is already in use
-            changeNick();
+
+            sendRaw("PONG " + str.substring(5));
+
+        } else if(getNumeric(str).equals("433")) { // Nickname is already in use
+
+            sendRaw("NICK " + nick + System.currentTimeMillis());
+
+        } else if(getNumeric(str).equals("332") || getNumeric(str).equals("331")) {
+
+            String channel = str.split(" ")[3];
+            channelStatus.put(channel, Status.OK);
+
         } else if(str.contains("DCC SEND")) {
-            xdcc(str);
+
+            String[] s = str.split("DCC SEND ")[1].split(" ");
+
+            if(s.length != 4)
+                return;
+
+            String filename = s[0];
+            String ip = parseIp(s[1]);
+            int port = Integer.parseInt(s[2]);
+            long fileSize = Long.parseLong(s[3].replaceAll("\\D+", "")); // Fix NumberFormatException
+
+            logger.debug("filename: {}, ip: {}, port: {}, fileSize: {}", filename, ip, port, fileSize);
+
+            String file = System.getProperty("user.home") + "/Downloads/" + filename;
+            FileTransfer.newFileTransfer(ip, port, fileSize, file);
         }
     }
 
@@ -63,36 +98,12 @@ public class Bot implements Observer {
         sendRaw("PRIVMSG " + botName + " :xdcc send #" + packNumber);
     }
 
-    private void joinChannel() {
-        sendRaw("JOIN " + channel);
+    public Status getChannelStatus(String channel) {
+        return channelStatus.get(channel);
     }
 
-    private void pong(String s) {
-        sendRaw("PONG " + s.substring(5));
-    }
-
-    private void changeNick() {
-        sendRaw("NICK " + getRandomNick(nick));
-    }
-
-    private void xdcc(String s) {
-
-        String[] str = s.split("DCC SEND ")[1].split(" ");
-        String filename = str[0];
-        String ip = parseIp(str[1]);
-        int port = Integer.parseInt(str[2]);
-        String fileSize = "";
-        if(str.length == 4)
-            fileSize = str[3];
-
-        logger.debug("filename: {}, ip: {}, port: {}, fileSize: {}", filename, ip, port, fileSize);
-
-        String file = System.getProperty("user.home") + "/Downloads/" + filename;
-        FileTransfer.newFileTransfer(ip, port, file);
-    }
-
-    private static String getRandomNick(String nick) {
-        return nick + System.currentTimeMillis();
+    private static String getNumeric(String str) {
+        return (str.contains(" ")) ? str.split(" ")[1] : "";
     }
 
     private static String parseIp(String ip) {

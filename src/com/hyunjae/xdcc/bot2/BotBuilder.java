@@ -6,17 +6,10 @@ public class BotBuilder {
 
     private String server;
     private String nick;
-    private String channel;
+    private String[] channels;
 
     public static BotBuilder newBotBuilder() {
         return new BotBuilder();
-    }
-
-    private BotBuilder() {
-
-        this.server = "";
-        this.nick = "";
-        this.channel = "";
     }
 
     public BotBuilder setServer(String server) {
@@ -31,13 +24,13 @@ public class BotBuilder {
         return this;
     }
 
-    public BotBuilder setChannel(String channel) {
+    public BotBuilder setChannel(String... channel) {
 
-        this.channel = channel;
+        this.channels = channel;
         return this;
     }
 
     public Bot build() throws IOException {
-        return new Bot(this.server, this.nick, this.channel);
+        return new Bot(this.server, this.nick, this.channels);
     }
 }
