@@ -57,7 +57,7 @@ public class Bot implements Observer {
 
             sendRaw("NICK " + nick + System.currentTimeMillis());
 
-        } else if(getNumeric(str).equals("332") || getNumeric(str).equals("331")) {
+        } else if(getNumeric(str).equals("332") || getNumeric(str).equals("331")) { // Joined to channel
 
             String channel = str.split(" ")[3];
             channelStatus.put(channel, Status.OK);
@@ -72,7 +72,7 @@ public class Bot implements Observer {
             String filename = s[0];
             String ip = parseIp(s[1]);
             int port = Integer.parseInt(s[2]);
-            long fileSize = Long.parseLong(s[3].replaceAll("\\D+", "")); // Fix NumberFormatException
+            long fileSize = Long.parseLong(s[3].replaceAll("\\u0001", "")); // Fix NumberFormatException
 
             logger.debug("filename: {}, ip: {}, port: {}, fileSize: {}", filename, ip, port, fileSize);
 
@@ -93,7 +93,7 @@ public class Bot implements Observer {
         }
     }
 
-    public void sendXdcc(String botName, String packNumber) {
+    public void xdccSend(String botName, String packNumber) {
         sendRaw("PRIVMSG " + botName + " :xdcc send #" + packNumber);
     }
 

@@ -9,7 +9,7 @@ public class Nipponsei {
 
     public static Pack[] all() throws Exception {
 
-        Document doc = Jsoup.connect("https://nipponsei.minglong.org/packlist/archive/").get();
+        final Document doc = Jsoup.connect("https://nipponsei.minglong.org/packlist/archive/").get();
 
         Elements rows = doc.select("#main table tr");
         int size = rows.size();
@@ -21,8 +21,9 @@ public class Nipponsei {
         }
 
         return packs;
-
     }
+
+    // TODO : ADD search(String str)
 
     private static String parseInt(String s) {
         return s.replaceAll("[^0-9]", "");
