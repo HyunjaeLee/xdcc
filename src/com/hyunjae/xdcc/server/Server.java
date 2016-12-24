@@ -25,7 +25,12 @@ public class Server {
             while(true) {
                 Socket clientSocket = serverSocket.accept();
                 logger.debug("Connected to {}", clientSocket.getInetAddress());
-                Wrapper wrapper = new Wrapper(clientSocket);
+                Wrapper wrapper = new Wrapper(clientSocket,
+                        "irc.rizon.net",
+                        "bot",
+                        "#nipponsei",
+                        "Nippon|zongzing",
+                        "4668");
                 executorService.execute(wrapper);
             }
         } catch (IOException e) {

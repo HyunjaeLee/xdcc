@@ -10,26 +10,33 @@ public class Wrapper implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(Wrapper.class);
 
-    private static final String SERVER = "irc.rizon.net";
-    private static final String NICK = "bot";
-    private static final String CHANNEL = "#nipponsei";
-
     private Socket clientSocket;
+    private String server;
+    private String nick;
+    private String channel;
+    private String botName;
+    private String packNumber;
 
-    public Wrapper(Socket clientSocket) {
+    public Wrapper(Socket clientSocket, String server, String nick, String channel, String botName, String packNumber) {
+
         this.clientSocket = clientSocket;
+        this.server = server;
+        this.nick = nick;
+        this.channel = channel;
+        this.botName = botName;
+        this.packNumber = packNumber;
     }
 
     @Override
     public void run() {
 
         try {
-            Socket ircSocket = new Socket(SERVER, 6667);
+            Socket ircSocket = new Socket(server, 6667);
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(ircSocket.getOutputStream()));
             BufferedReader reader = new BufferedReader(new InputStreamReader(ircSocket.getInputStream()));
 
-            writer.write("USER " + NICK + " 8 * : bot" + "\r\n");
-            writer.write("NICK " + NICK + "\r\n");
+            writer.write("USER " + nick + " 8 * : bot" + "\r\n");
+            writer.write("NICK " + nick + "\r\n");
             writer.flush();
 
             String line;
@@ -39,7 +46,7 @@ public class Wrapper implements Runnable {
 
                 if(getNumeric(line).equals("001")) { // Connected to server
 
-                    writer.write("JOIN " + CHANNEL + "\r\n");
+                    writer.write("JOIN " + channel + "\r\n");
                     writer.flush();
 
                 } else if(line.startsWith("PING")) {
@@ -49,13 +56,13 @@ public class Wrapper implements Runnable {
 
                 } else if(getNumeric(line).equals("433")) { // Nickname is already in use
 
-                    String randomNick = NICK + System.currentTimeMillis();
+                    String randomNick = nick + System.currentTimeMillis();
                     writer.write("NICK " + randomNick + "\r\n");
                     writer.flush();
 
                 } else if(getNumeric(line).equals("332") || getNumeric(line).equals("331")) {
 
-                    writer.write("PRIVMSG " + "Nippon|zongzing" + " :xdcc send #" + "4668" + "\r\n"); // TODO
+                    writer.write("PRIVMSG " + botName + " :xdcc send #" + packNumber + "\r\n");
                     writer.flush();
 
                 } else if(line.contains("DCC SEND")) {
