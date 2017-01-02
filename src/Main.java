@@ -14,10 +14,12 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
+        /*
         Pack[] packs = Nipponsei.all();
         for(Pack pack : packs) {
             logger.debug("#{} {} {} {}M", pack.getPackNumber(), pack.getBotName(), pack.getFileName(), pack.getFileSize());
         }
+        */
 
         Bot bot = BotBuilder.newBotBuilder()
                 .setServer("irc.rizon.net")

@@ -3,8 +3,13 @@ package com.hyunjae.xdcc.bot2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.net.Socket;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
+import java.nio.channels.SocketChannel;
 
 public class FileTransfer implements Runnable {
 
@@ -31,38 +36,30 @@ public class FileTransfer implements Runnable {
     @Override
     public void run() {
 
-        try {
-            Socket socket = new Socket(ip, port);
-            BufferedInputStream socketInput = new BufferedInputStream(socket.getInputStream());
-            BufferedOutputStream socketOutput = new BufferedOutputStream(socket.getOutputStream());
-            BufferedOutputStream fileOutput = new BufferedOutputStream(new FileOutputStream(new File(file)));
+        try(SocketChannel socketChannel = SocketChannel.open();
+        FileChannel fileChannel = new FileOutputStream(file).getChannel()) {
 
-            byte[] inBuffer = new byte[1024];
-            byte[] outBuffer = new byte[4];
+            socketChannel.connect(new InetSocketAddress(ip, port));
+            ByteBuffer inBuffer = ByteBuffer.allocate(1024);
+            ByteBuffer outBuffer = ByteBuffer.allocate(4);
+            outBuffer.order(ByteOrder.BIG_ENDIAN);
+
             int bytesRead;
-            long bytesTransferred = 0;
-            //Read next part of incomming file
-            while((bytesRead = socketInput.read(inBuffer, 0, inBuffer.length)) != -1) {
+            int bytesTransferred = 0;
+            while((bytesRead = socketChannel.read(inBuffer)) != -1) {
 
-                //Write to file
-                fileOutput.write(inBuffer, 0, bytesRead);
-                bytesTransferred += bytesRead;
+                inBuffer.flip();
+                fileChannel.write(inBuffer);
+                inBuffer.clear();
 
-                //Send back an acknowledgement of how many bytes we have got so far.
                 //Convert bytesTransfered to an "unsigned, 4 byte integer in network byte order", per DCC specification
-                outBuffer[0] = (byte) ((bytesTransferred >> 24) & 0xff);
-                outBuffer[1] = (byte) ((bytesTransferred >> 16) & 0xff);
-                outBuffer[2] = (byte) ((bytesTransferred >> 8) & 0xff);
-                outBuffer[3] = (byte) (bytesTransferred & 0xff);
-
-                socketOutput.write(outBuffer);
-                socketOutput.flush();
+                bytesTransferred += bytesRead;
+                outBuffer.putInt(bytesTransferred); // TODO : Use unsigned-int
+                outBuffer.flip();
+                socketChannel.write(outBuffer);
+                outBuffer.clear();
             }
-
-            socketInput.close();
-            socketOutput.close();
-            fileOutput.close();
-        } catch (IOException e) {
+        } catch(IOException e) {
             logger.error(e.getMessage());
         }
 
