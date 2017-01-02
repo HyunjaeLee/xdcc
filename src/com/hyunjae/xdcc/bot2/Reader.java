@@ -22,12 +22,13 @@ public class Reader extends Observable implements Runnable {
     @Override
     public void run() {
 
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
             String line;
             while((line = reader.readLine()) != null) {
+
                 logger.debug(line);
+
                 setChanged();
                 notifyObservers(line);
             }
