@@ -19,11 +19,10 @@ public class FileTransfer implements Runnable {
     private int port;
     private String file;
 
-    public static FileTransfer newFileTransfer(String ip, int port, String file) {
+    public static void newAsynchronousFileTransfer(String ip, int port, String file) {
 
         FileTransfer fileTransfer = new FileTransfer(ip, port, file);
         new Thread(fileTransfer).start();
-        return fileTransfer;
     }
 
     private FileTransfer(String ip, int port, String file) {

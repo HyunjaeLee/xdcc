@@ -77,7 +77,7 @@ public class Bot implements Observer {
             logger.debug("filename: {}, ip: {}, port: {}, fileSize: {}", filename, ip, port, fileSize);
 
             String file = System.getProperty("user.home") + "/Downloads/" + filename;
-            FileTransfer.newFileTransfer(ip, port, file);
+            FileTransfer.newAsynchronousFileTransfer(ip, port, file);
         }
     }
 
